@@ -20,7 +20,7 @@ protocol Event {
     var end: Time { get }
 }
 
-enum Day: Int, CaseIterable {
+public enum Day: Int, CaseIterable {
     case Monday, Tuesday, Wednesday, Thursday, Friday
     
     var index: Int {
