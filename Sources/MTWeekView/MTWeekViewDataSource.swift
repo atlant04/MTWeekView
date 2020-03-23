@@ -10,8 +10,8 @@ import Foundation
 import UIKit
 
 public protocol MTWeekViewDataSource {
-    public func weekView(_ weekView: MTWeekView, eventsForDay day: Day) -> [Event]
-    public func hourRangeForWeek(_ weekView: MTWeekView) -> (start: Time, end: Time)
+    func weekView(_ weekView: MTWeekView, eventsForDay day: Day) -> [Event]
+    func hourRangeForWeek(_ weekView: MTWeekView) -> (start: Time, end: Time)
 }
 
 protocol Event {
