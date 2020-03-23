@@ -71,7 +71,7 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
         configuration.totalDays + 1
     }
     
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         allEvents.count
     }
     
