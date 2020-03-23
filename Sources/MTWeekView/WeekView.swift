@@ -9,7 +9,7 @@
 import UIKit
 
 
-class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSource, MTWeekViewCollectionLayoutDelegate {
+open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSource, MTWeekViewCollectionLayoutDelegate {
     
     var dataSource: MTWeekViewDataSource? {
         didSet {
