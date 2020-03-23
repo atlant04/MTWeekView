@@ -32,7 +32,7 @@ enum Day: Int, CaseIterable {
     }
 }
 
-open struct LayoutConfiguration {
+public struct LayoutConfiguration {
     public init() { }
     
     var start: Time = Time(hour: 0, minute: 0)
