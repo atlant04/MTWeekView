@@ -25,7 +25,7 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
     var range = (start: Time(hour: 0, minute: 0), end: Time(hour: 23, minute: 0))
     
     
-    init(frame: CGRect, configuration: LayoutConfiguration) {
+   public init(frame: CGRect, configuration: LayoutConfiguration) {
         super.init(frame: frame)
         self.configuration = configuration
         
@@ -63,11 +63,11 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
         collectionView.register(EventCell.self, forCellWithReuseIdentifier: EventCell.reuseId)
     }
     
-    required init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
+    public func numberOfSections(in collectionView: UICollectionView) -> Int {
         configuration.totalDays + 1
     }
     
@@ -79,19 +79,19 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
         return range
     }
     
-    func collectionView(_ collectionView: UICollectionView, timeRangeForItemAt indexPath: IndexPath) -> (start: Time, end: Time) {
+    public func collectionView(_ collectionView: UICollectionView, timeRangeForItemAt indexPath: IndexPath) -> (start: Time, end: Time) {
         let event = allEvents[indexPath.item]
         return (start: event.start, end: event.end)
     }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         print(indexPath)
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EventCell.reuseId, for: indexPath) as! EventCell
         cell.configure(with: allEvents[indexPath.item])
         return cell
     }
     
-    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+    public func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         
         let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: kind, for: indexPath)
         (view as? ReusableView)?.configure(with: indexPath)
