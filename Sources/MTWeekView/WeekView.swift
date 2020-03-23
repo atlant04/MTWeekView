@@ -11,7 +11,7 @@ import UIKit
 
 open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSource, MTWeekViewCollectionLayoutDelegate {
     
-    var dataSource: MTWeekViewDataSource? {
+    public var dataSource: MTWeekViewDataSource? {
         didSet {
             getEvents()
             getHourRange()
