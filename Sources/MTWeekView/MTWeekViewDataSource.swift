@@ -46,12 +46,12 @@ public struct Time {
     var hour: Int
     var minute: Int
     
-    init(hour: Int, minute: Int) {
+   public init(hour: Int, minute: Int) {
         self.hour = hour
         self.minute = minute
     }
     
-    init(from date: Date) {
+   public init(from date: Date) {
         let components = Calendar.current.dateComponents([.hour, .minute], from: date)
         self.hour = components.hour ?? 0
         self.minute = components.minute ?? 0
