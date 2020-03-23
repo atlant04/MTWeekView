@@ -32,7 +32,7 @@ enum Day: Int, CaseIterable {
     }
 }
 
-struct LayoutConfiguration {
+public struct LayoutConfiguration {
     var start: Time = Time(hour: 0, minute: 0)
     var end: Time = Time(hour: 24, minute: 0)
     var interval: Time = Time(hour: 1, minute: 0)
@@ -40,7 +40,7 @@ struct LayoutConfiguration {
     var gridLineThickness: CGFloat =  1
 }
 
-struct Time {
+public struct Time {
     var hour: Int
     var minute: Int
     
