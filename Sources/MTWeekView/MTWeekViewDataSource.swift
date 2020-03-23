@@ -14,7 +14,7 @@ public protocol MTWeekViewDataSource {
     func hourRangeForWeek(_ weekView: MTWeekView) -> (start: Time, end: Time)
 }
 
-protocol Event {
+public protocol Event {
     var day: Day { get set }
     var start: Time { get }
     var end: Time { get }
