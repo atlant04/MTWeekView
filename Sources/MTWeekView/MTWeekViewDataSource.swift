@@ -59,14 +59,14 @@ public struct Time {
 
 
 extension Time: Comparable {
-    static func < (lhs: Time, rhs: Time) -> Bool {
+    public static func < (lhs: Time, rhs: Time) -> Bool {
         lhs.hour < rhs.hour && lhs.minute < rhs.minute
     }
 }
 
 extension Time {
     
-    static func -(lhs: Time, rhs: Time) -> Time {
+   public static func -(lhs: Time, rhs: Time) -> Time {
         var hours = lhs.hour - rhs.hour
         var minutes = lhs.minute - rhs.minute
         
@@ -82,7 +82,7 @@ extension Time {
         return Time(hour: hours, minute: minutes)
     }
     
-    static func +(lhs: Time, rhs: Time) -> Time {
+    public static func +(lhs: Time, rhs: Time) -> Time {
         var hours = lhs.hour + rhs.hour
         var minutes = lhs.minute + rhs.minute
         
@@ -98,7 +98,7 @@ extension Time {
         return Time(hour: hours, minute: minutes)
     }
     
-    static func /(lhs: Time, rhs: Time) -> Time {
+    public static func /(lhs: Time, rhs: Time) -> Time {
         let first: Float = Float(lhs.hour) + Float(lhs.minute) / 60.0
         let second: Float = Float(rhs.hour) + Float(rhs.minute) / 60.0
         
@@ -110,7 +110,7 @@ extension Time {
         return Time(hour: Int(whole), minute: Int(decimal * 60))
     }
     
-    static func *(lhs: Int, rhs: Time) -> Time {
+    public static func *(lhs: Int, rhs: Time) -> Time {
         var result = Time(hour: 0, minute: 0)
         for _ in 0 ..< lhs {
             result = result + rhs
@@ -118,17 +118,17 @@ extension Time {
         return result
     }
     
-    static func <=(lhs: Time, rhs: Time) -> Bool {
+   public static func <=(lhs: Time, rhs: Time) -> Bool {
         return lhs.hour <= rhs.hour && lhs.minute <= rhs.minute
     }
 }
 
 extension Time {
-    func float() -> Float {
+    public func float() -> Float {
         return Float(self.hour) + Float(self.minute) / 60.0
     }
     
-    static func fromFloat(_ value: Float) -> Time {
+    public static func fromFloat(_ value: Float) -> Time {
         let whole = modf(value).0
         let decimal = modf(value).1
         
