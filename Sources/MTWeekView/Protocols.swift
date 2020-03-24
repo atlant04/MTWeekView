@@ -8,12 +8,12 @@
 
 import Foundation
 
-public protocol SelfConfiguringCell {
+public protocol MTSelfConfiguringEventCell {
     static var reuseId: String { get }
     func configure(with data: Event)
 }
 
-extension SelfConfiguringCell {
+extension MTSelfConfiguringEventCell {
     static var reuseId: String {
         return String(describing: self)
     }

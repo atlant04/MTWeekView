@@ -23,7 +23,7 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
     var configuration: LayoutConfiguration!
     var allEvents:[Day: [Event]] = [:]
     var range = (start: Time(hour: 0, minute: 0), end: Time(hour: 23, minute: 0))
-    var cellType: SelfConfiguringCell.Type?
+    var cellType: MTSelfConfiguringEventCell.Type?
     
     
     public init(frame: CGRect, configuration: LayoutConfiguration) {
@@ -74,7 +74,7 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
         addSubview(collectionView)
     }
     
-    public func registerCell<T: UICollectionViewCell>(of type: T.Type) where T: SelfConfiguringCell {
+    public func registerCell<T: UICollectionViewCell>(of type: T.Type) where T: MTSelfConfiguringEventCell {
         self.cellType = type
         self.collectionView.register(type, forCellWithReuseIdentifier: type.reuseId)
     }
@@ -113,10 +113,10 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
     }
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell: SelfConfiguringCell
+        let cell: MTSelfConfiguringEventCell
         
         if let type = self.cellType {
-            cell = collectionView.dequeueReusableCell(withReuseIdentifier: type.reuseId, for: indexPath) as! SelfConfiguringCell
+            cell = collectionView.dequeueReusableCell(withReuseIdentifier: type.reuseId, for: indexPath) as! MTSelfConfiguringEventCell
         } else {
             cell = collectionView.dequeueReusableCell(withReuseIdentifier: EventCell.reuseId, for: indexPath) as! EventCell
         }
@@ -137,7 +137,7 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
     }
 }
 
-class EventCell: UICollectionViewCell, SelfConfiguringCell {
+class EventCell: UICollectionViewCell, MTSelfConfiguringEventCell {
     func configure(with data: Event) {
         
     }

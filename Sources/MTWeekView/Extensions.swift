@@ -42,9 +42,3 @@ extension CGRect {
     }
 }
 
-extension UICollectionView {
-    func dequeueSupplementaryView<T: SelfConfiguringCell>(for indexPath: IndexPath) -> T {
-        let view = self.dequeueReusableSupplementaryView(ofKind: T.reuseId, withReuseIdentifier: T.reuseId, for: indexPath) as! T
-        return view
-    }
-}
