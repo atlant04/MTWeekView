@@ -48,6 +48,7 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
     public func invalidate() {
         getEvents()
         getHourRange()
+        layout.clearCache()
         collectionView.reloadData()
         layout.invalidateLayout()
     }

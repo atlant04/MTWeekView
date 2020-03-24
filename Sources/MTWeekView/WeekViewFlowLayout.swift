@@ -56,6 +56,10 @@ class MTWeekViewCollectionLayout: UICollectionViewFlowLayout {
         fatalError("init(coder:) has not been implemented")
     }
     
+    public func clearCache() {
+        allAttributes = []
+    }
+    
     override func prepare() {
         guard allAttributes.isEmpty else { return }
         self.range = delegate?.rangeForCurrentWeek(collectionView!)
