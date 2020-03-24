@@ -43,8 +43,8 @@ public struct LayoutConfiguration {
 }
 
 public struct Time {
-    var hour: Int
-    var minute: Int
+    public var hour: Int
+    public var minute: Int
     
    public init(hour: Int, minute: Int) {
         self.hour = hour
