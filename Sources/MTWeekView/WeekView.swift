@@ -29,12 +29,19 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
         super.init(frame: frame)
         self.configuration = configuration
         
-        
         layout = MTWeekViewCollectionLayout(configuration: configuration)
         layout.delegate = self
         collectionView = UICollectionView(frame: self.bounds, collectionViewLayout: layout!)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
         registerClasses()
         setupCollectionView()
+    
+        NSLayoutConstraint.activate([
+            collectionView.topAnchor.constraint(equalTo: topAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
     }
     
     public func invalidate() {
@@ -44,6 +51,7 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
         collectionView.layoutIfNeeded()
         layout.invalidateLayout()
     }
+
     
     func getEvents() {
         for day in Day.allCases {
