@@ -149,6 +149,7 @@ class MTWeekViewCollectionLayout: UICollectionViewFlowLayout {
                 let frame = CGRect(x: xOffset, y: startY, width: unitWidth, height: height)
                 let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
                 attributes.frame = frame
+                attributes.zIndex = 1000
                 result.append(attributes)
             }
         }
