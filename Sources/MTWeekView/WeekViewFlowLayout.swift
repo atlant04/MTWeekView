@@ -20,7 +20,7 @@ class MTWeekViewCollectionLayout: UICollectionViewFlowLayout {
     
     var delegate: MTWeekViewCollectionLayoutDelegate?
     
-    var headerHeight: CGFloat = 50
+    var headerHeight: CGFloat = 20
     var heightPerHour: CGFloat = 50
     
     var totalHours: Int = 24
@@ -81,7 +81,7 @@ class MTWeekViewCollectionLayout: UICollectionViewFlowLayout {
         totalHeight = collectionView.bounds.height
         totalWidth = collectionView.bounds.width - CGFloat(timelineWidth)
         
-        totalHours = ((range.end - range.start) / config.interval).hour + 1
+        totalHours = range.end.hour - range.start.hour
         heightPerHour = collectionView.bounds.height / CGFloat(totalHours)
         
         horizontalLineCount = Int(totalHeight / heightPerHour)
@@ -97,7 +97,7 @@ class MTWeekViewCollectionLayout: UICollectionViewFlowLayout {
         
         for (indexPath, headerAttribute) in headerCache {
             let headerFrame = headerAttribute.frame
-            let frame = CGRect(x: headerFrame.origin.x, y: headerHeight, width: gridLineThickness, height: totalHeight)
+            let frame = CGRect(x: headerFrame.origin.x, y: headerHeight + unitHeight / 2, width: gridLineThickness, height: totalHeight)
             let attributes = UICollectionViewLayoutAttributes(forDecorationViewOfKind: MTGridLine.reuseId, with: indexPath)
             attributes.frame = frame
             result.append(attributes)
@@ -191,7 +191,7 @@ class MTWeekViewCollectionLayout: UICollectionViewFlowLayout {
     override var collectionViewContentSize: CGSize {
         guard let collectionView = collectionView else { return .zero }
         let width = collectionView.bounds.width
-        let height = headerHeight + (heightPerHour * CGFloat(totalHours))
+        let height = headerHeight + (heightPerHour * CGFloat(totalHours)) + unitHeight
         return CGSize(width: width, height: height)
     }
     

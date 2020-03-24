@@ -23,9 +23,10 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
     var configuration: LayoutConfiguration!
     var allEvents:[Day: [Event]] = [:]
     var range = (start: Time(hour: 0, minute: 0), end: Time(hour: 23, minute: 0))
+    var cellType: SelfConfiguringCell.Type?
     
     
-   public init(frame: CGRect, configuration: LayoutConfiguration) {
+    public init(frame: CGRect, configuration: LayoutConfiguration) {
         super.init(frame: frame)
         self.configuration = configuration
         
@@ -35,7 +36,7 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         registerClasses()
         setupCollectionView()
-    
+        
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: topAnchor),
             collectionView.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -51,7 +52,7 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
         collectionView.layoutIfNeeded()
         layout.invalidateLayout()
     }
-
+    
     
     func getEvents() {
         for day in Day.allCases {
@@ -73,10 +74,15 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
         addSubview(collectionView)
     }
     
-    func registerClasses() {
+    public func registerCell<T: UICollectionViewCell>(of type: T.Type) where T: SelfConfiguringCell {
+        self.cellType = type
+        self.collectionView.register(type, forCellWithReuseIdentifier: type.reuseId)
+    }
+    
+    public func registerClasses() {
         collectionView.register(MTTimelineHeader.self, forSupplementaryViewOfKind: MTTimelineHeader.reuseId, withReuseIdentifier: MTTimelineHeader.reuseId)
         collectionView.register(MTDayHeader.self, forSupplementaryViewOfKind: MTDayHeader.reuseId, withReuseIdentifier: MTDayHeader.reuseId)
-        collectionView.register(EventCell.self, forCellWithReuseIdentifier: EventCell.reuseId)
+        //collectionView.register(EventCell.self, forCellWithReuseIdentifier: EventCell.reuseId)
     }
     
     public required init?(coder: NSCoder) {
@@ -107,13 +113,20 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
     }
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        print(indexPath)
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EventCell.reuseId, for: indexPath) as! EventCell
+        let cell: SelfConfiguringCell
+        
+        if let type = self.cellType {
+            cell = collectionView.dequeueReusableCell(withReuseIdentifier: type.reuseId, for: indexPath) as! SelfConfiguringCell
+        } else {
+            cell = collectionView.dequeueReusableCell(withReuseIdentifier: EventCell.reuseId, for: indexPath) as! EventCell
+        }
+        
         if let day = Day(rawValue: indexPath.section), let events = allEvents[day] {
             let event = events[indexPath.item]
             cell.configure(with: event)
         }
-        return cell
+    
+        return cell as! UICollectionViewCell
     }
     
     public func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {

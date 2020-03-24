@@ -8,10 +8,9 @@
 
 import Foundation
 
-protocol SelfConfiguringCell {
-    associatedtype DataType
+public protocol SelfConfiguringCell {
     static var reuseId: String { get }
-    func configure(with data: DataType)
+    func configure(with data: Event)
 }
 
 extension SelfConfiguringCell {
