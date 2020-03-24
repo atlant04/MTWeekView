@@ -40,6 +40,8 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
     public func invalidate() {
         setNeedsLayout()
         layoutIfNeeded()
+        collectionView.setNeedsLayout()
+        collectionView.layoutIfNeeded()
         layout.invalidateLayout()
     }
     
