@@ -37,6 +37,10 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
         setupCollectionView()
     }
     
+    public func invalidate() {
+        layout.invalidateLayout()
+    }
+    
     func getEvents() {
         for day in Day.allCases {
             guard let events = dataSource?.weekView(self, eventsForDay: day) else { continue }
