@@ -21,7 +21,7 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
     
     var collectionView: UICollectionView!
     var configuration: LayoutConfiguration!
-    var allEvents = [Event]()
+    var allEvents:[Day: [Event]] = [:]
     var range = (start: Time(hour: 0, minute: 0), end: Time(hour: 23, minute: 0))
     
     
@@ -40,7 +40,7 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
     func getEvents() {
         for day in Day.allCases {
             guard let events = dataSource?.weekView(self, eventsForDay: day) else { continue }
-            allEvents.append(contentsOf: events)
+            allEvents[day] = events
         }
     }
     
@@ -72,7 +72,10 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
     }
     
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        allEvents.count
+        if let day = Day(rawValue: section), let events = allEvents[day] {
+            return events.count
+        }
+        return 0
     }
     
     func rangeForCurrentWeek(_ collectionView: UICollectionView) -> (start: Time, end: Time) {
@@ -80,14 +83,20 @@ open class MTWeekView: UIView, UICollectionViewDelegate, UICollectionViewDataSou
     }
     
     public func collectionView(_ collectionView: UICollectionView, timeRangeForItemAt indexPath: IndexPath) -> (start: Time, end: Time) {
-        let event = allEvents[indexPath.item]
-        return (start: event.start, end: event.end)
+        if let day = Day(rawValue: indexPath.section), let events = allEvents[day] {
+            let event = events[indexPath.item]
+            return (start: event.start, end: event.end)
+        }
+        return (start: Time(hour: 0, minute: 0), end: Time(hour: 0, minute: 0))
     }
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         print(indexPath)
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EventCell.reuseId, for: indexPath) as! EventCell
-        cell.configure(with: allEvents[indexPath.item])
+        if let day = Day(rawValue: indexPath.section), let events = allEvents[day] {
+            let event = events[indexPath.item]
+            cell.configure(with: event)
+        }
         return cell
     }
     
