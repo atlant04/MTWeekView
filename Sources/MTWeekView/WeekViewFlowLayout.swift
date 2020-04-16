@@ -16,31 +16,32 @@ protocol MTWeekViewCollectionLayoutDelegate {
     func rangeForCurrentWeek(_ collectionView: UICollectionView) -> (start: Time, end: Time)
 }
 
-class MTWeekViewCollectionLayout: UICollectionViewFlowLayout {
+class MTWeekViewCollectionLayout: UICollectionViewLayout {
     
     var delegate: MTWeekViewCollectionLayoutDelegate?
     
     var headerHeight: CGFloat = 20
-    var heightPerHour: CGFloat = 50
+    var timelineWidth = 40
     
     var totalHours: Int = 24
-    var totalHeight: CGFloat = 0
-    var totalWidth: CGFloat = 0
-    var timelineWidth = 40
+    var heightPerHour: CGFloat = 50
+    
+    var gridHeight: CGFloat = 0
+    var gridWidth: CGFloat = 0
     
     var horizontalLineCount: Int = 0
     var verticalLineCount: Int = 0
-    
     
     var unitHeight: CGFloat = 0
     var unitWidth: CGFloat = 0
     
     typealias AttDict = [IndexPath: UICollectionViewLayoutAttributes]
+    typealias Attributes = UICollectionViewLayoutAttributes
     
     var allAttributes: [UICollectionViewLayoutAttributes] = []
-    var headerCache: AttDict = [:]
+    var headerCache = [Attributes]()
     var timelineCache: AttDict = [:]
-    var gridCache: [UICollectionViewLayoutAttributes] = []
+    var gridCache = [[Attributes]]()
     var eventCache: [UICollectionViewLayoutAttributes] = []
     
     var config: LayoutConfiguration
@@ -62,161 +63,168 @@ class MTWeekViewCollectionLayout: UICollectionViewFlowLayout {
     
     override func prepare() {
         guard allAttributes.isEmpty else { return }
+        
         self.range = delegate?.rangeForCurrentWeek(collectionView!)
         
-        setupUIElements()
-        timelineCache = layoutAttributesForTimelineView()
-        headerCache = layoutAttributesForHeaderView()
-        gridCache = layoutAttributesForGridView()
+        calculateParams()
+        
+        
+//        timelineCache = layoutAttributesForTimelineView()
+//        headerCache = layoutAttributesForHeaderView()
+//        gridCache = layoutAttributesForGridView()
         
         for day in 0 ..< config.totalDays {
-            eventCache.append(contentsOf: layoutEvents(for: day))
+            //eventCache.append(contentsOf: layoutEvents(for: day))
         }
             
-        allAttributes.append(contentsOf: Array(headerCache.values))
-        allAttributes.append(contentsOf: Array(timelineCache.values))
-        allAttributes.append(contentsOf: gridCache)
-        allAttributes.append(contentsOf: eventCache)
+//        allAttributes.append(contentsOf: Array(headerCache.values))
+//        allAttributes.append(contentsOf: Array(timelineCache.values))
+//        allAttributes.append(contentsOf: gridCache)
+//        allAttributes.append(contentsOf: eventCache)
         
     }
     
-    func setupUIElements() {
+    func calculateParams() {
         guard let collectionView = collectionView else { return }
-        totalHeight = collectionView.bounds.height
-        totalWidth = collectionView.bounds.width - CGFloat(timelineWidth)
+        gridHeight = collectionView.bounds.height - CGFloat(headerHeight)
+        gridWidth = collectionView.bounds.width - CGFloat(timelineWidth)
         
         totalHours = range.end.hour - range.start.hour
-        heightPerHour = collectionView.bounds.height / CGFloat(totalHours)
+        heightPerHour = gridHeight / CGFloat(totalHours)
         
-        horizontalLineCount = Int(totalHeight / heightPerHour)
-        verticalLineCount = config.totalDays
+        horizontalLineCount = Int(gridHeight / heightPerHour)
+        verticalLineCount = config.totalDays + 1
         
-        unitHeight = totalHeight / CGFloat(horizontalLineCount)
-        unitWidth = totalWidth / CGFloat(verticalLineCount)
+        unitHeight = gridHeight / CGFloat(horizontalLineCount)
+        unitWidth = gridWidth / CGFloat(verticalLineCount)
     }
     
-    func layoutAttributesForGridView() -> [UICollectionViewLayoutAttributes] {
-        var result = [UICollectionViewLayoutAttributes]()
-        let gridLineThickness = config.gridLineThickness
+    func layoutGrid() {
+        let lineWidth = config.gridLineThickness
         
-        for (indexPath, headerAttribute) in headerCache {
-            let headerFrame = headerAttribute.frame
-            let frame = CGRect(x: headerFrame.origin.x, y: headerHeight + unitHeight / 2, width: gridLineThickness, height: totalHeight)
-            let attributes = UICollectionViewLayoutAttributes(forDecorationViewOfKind: MTGridLine.reuseId, with: indexPath)
-            attributes.frame = frame
-            result.append(attributes)
+        for day in 0 ..< verticalLineCount {
+            let header = headerCache[day]
+            let origin = header.frame.
+            
         }
         
-        for (indexPath, rowAttribute) in timelineCache {
-            let rowViewFrame = rowAttribute.frame
-            let frame = CGRect(x: rowViewFrame.size.width, y: rowViewFrame.center.y, width: totalWidth, height: gridLineThickness)
-            let attributes = UICollectionViewLayoutAttributes(forDecorationViewOfKind: MTGridLine.reuseId, with: indexPath)
-            attributes.frame = frame
-            result.append(attributes)
-        }
-        return result
+//        for (indexPath, headerAttribute) in headerCache {
+//            let headerFrame = headerAttribute.frame
+//            let frame = CGRect(x: headerFrame.origin.x, y: headerHeight + unitHeight / 2, width: gridLineThickness, height: totalHeight)
+//            let attributes = UICollectionViewLayoutAttributes(forDecorationViewOfKind: MTGridLine.reuseId, with: indexPath)
+//            attributes.frame = frame
+//            result.append(attributes)
+//        }
+//
+//        for (indexPath, rowAttribute) in timelineCache {
+//            let rowViewFrame = rowAttribute.frame
+//            let frame = CGRect(x: rowViewFrame.size.width, y: rowViewFrame.center.y, width: totalWidth, height: gridLineThickness)
+//            let attributes = UICollectionViewLayoutAttributes(forDecorationViewOfKind: MTGridLine.reuseId, with: indexPath)
+//            attributes.frame = frame
+//            result.append(attributes)
+//        }
     }
 
     
-    func layoutEvents(for section: Int) -> [UICollectionViewLayoutAttributes] {
-        var result = [UICollectionViewLayoutAttributes]()
-        
-        for i in 0..<collectionView!.numberOfItems(inSection: section) {
-            
-            let indexPath = IndexPath(item: i, section: section)
-            guard let times = delegate?.collectionView(collectionView!, timeRangeForItemAt: indexPath) else { continue }
-            
-            let startIndexPath = IndexPath(item: times.start.hour, section: config.totalDays)
-            let endIndexPath = IndexPath(item: times.end.hour, section: config.totalDays)
-            let dayIndexPath = IndexPath(item: 0, section: section)
-            
-            if let startAttributes = timelineCache[startIndexPath],
-                let endAttributes = timelineCache[endIndexPath],
-                let dayAttributes = headerCache[dayIndexPath] {
-                
-                let startHourY = startAttributes.frame.centerY
-                let startMinY = CGFloat(times.start.minute) * unitHeight / 60
-                let startY = startHourY + startMinY
-                
-                let endHourY = endAttributes.frame.centerY
-                let endMinY = CGFloat(times.end.minute) * unitHeight / 60
-                let height = endHourY + endMinY - startY
-                
-//                let hourDifference = CGFloat(times.end.hour - times.start.hour)
-//                let heightHour = hourDifference * unitHeight
-//                let heightMinute = CGFloat(times.end.minute) * unitHeight / 60
-//                let gridLineWidth = hourDifference * config.gridLineThickness
-//                let height = heightHour + heightMinute + gridLineWidth
-//                let x = CGFloat(day.index + 1) * unitWidth
-                
-                let xOffset = dayAttributes.frame.origin.x
-                let frame = CGRect(x: xOffset, y: startY, width: unitWidth, height: height)
-                let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
-                attributes.frame = frame
-                attributes.zIndex = 1000
-                result.append(attributes)
-            }
-        }
-        return result
-    }
-    
-    func layoutAttributesForHeaderView() -> AttDict {
-        var result = AttDict()
-        var xOffset: CGFloat = CGFloat(timelineWidth)
-        
-        for count in 0 ..< config.totalDays {
-            let indexPath = IndexPath(item: 0, section: count)
-            let frame = CGRect(x: xOffset, y: 0, width: unitWidth, height: headerHeight)
-            let attributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: MTDayHeader.reuseId, with: indexPath)
-            attributes.frame = frame
-            result[indexPath] = attributes
-            xOffset += unitWidth
-        }
-        
-        return result
-    }
-    
-    func layoutAttributesForTimelineView() -> [IndexPath: UICollectionViewLayoutAttributes] {
-        var result = [IndexPath: UICollectionViewLayoutAttributes]()
-        
-        var yOffset: CGFloat = headerHeight
-        for count in range.start.hour ... range.end.hour {
-            let indexPath = IndexPath(item: count, section: config.totalDays)
-            let frame = CGRect(x: 0, y: yOffset, width: 40, height: unitHeight + config.gridLineThickness)
-            let attributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: MTTimelineHeader.reuseId, with: indexPath)
-            attributes.frame = frame
-            attributes.zIndex = 1
-            result[indexPath] = attributes
-            yOffset += unitHeight
-       
-        }
-        return result
-    }
-    
-    override var collectionViewContentSize: CGSize {
-        guard let collectionView = collectionView else { return .zero }
-        let width = collectionView.bounds.width
-        let height = headerHeight + (heightPerHour * CGFloat(totalHours)) + unitHeight
-        return CGSize(width: width, height: height)
-    }
-    
-    override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
-        var visibleAttributes = [UICollectionViewLayoutAttributes]()
-        
-        for attribute in allAttributes {
-            if attribute.frame.intersects(rect) {
-                visibleAttributes.append(attribute)
-            }
-        }
-        return visibleAttributes
-    }
-    
-    override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-        eventCache[indexPath.item]
-    }
-    
+//    func layoutEvents(for section: Int) -> [UICollectionViewLayoutAttributes] {
+//        var result = [UICollectionViewLayoutAttributes]()
+//
+//        for i in 0..<collectionView!.numberOfItems(inSection: section) {
+//
+//            let indexPath = IndexPath(item: i, section: section)
+//            guard let times = delegate?.collectionView(collectionView!, timeRangeForItemAt: indexPath) else { continue }
+//
+//            let startIndexPath = IndexPath(item: times.start.hour, section: config.totalDays)
+//            let endIndexPath = IndexPath(item: times.end.hour, section: config.totalDays)
+//            let dayIndexPath = IndexPath(item: 0, section: section)
+//
+//            if let startAttributes = timelineCache[startIndexPath],
+//                let endAttributes = timelineCache[endIndexPath],
+//                let dayAttributes = headerCache[dayIndexPath] {
+//
+//                let startHourY = startAttributes.frame.centerY
+//                let startMinY = CGFloat(times.start.minute) * unitHeight / 60
+//                let startY = startHourY + startMinY
+//
+//                let endHourY = endAttributes.frame.centerY
+//                let endMinY = CGFloat(times.end.minute) * unitHeight / 60
+//                let height = endHourY + endMinY - startY
+//
+////                let hourDifference = CGFloat(times.end.hour - times.start.hour)
+////                let heightHour = hourDifference * unitHeight
+////                let heightMinute = CGFloat(times.end.minute) * unitHeight / 60
+////                let gridLineWidth = hourDifference * config.gridLineThickness
+////                let height = heightHour + heightMinute + gridLineWidth
+////                let x = CGFloat(day.index + 1) * unitWidth
+//
+//                let xOffset = dayAttributes.frame.origin.x
+//                let frame = CGRect(x: xOffset, y: startY, width: unitWidth, height: height)
+//                let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
+//                attributes.frame = frame
+//                attributes.zIndex = 1000
+//                result.append(attributes)
+//            }
+//        }
+//        return result
+//    }
+//
+//    func layoutAttributesForHeaderView() -> AttDict {
+//        var result = AttDict()
+//        var xOffset: CGFloat = CGFloat(timelineWidth)
+//
+//        for count in 0 ..< config.totalDays {
+//            let indexPath = IndexPath(item: 0, section: count)
+//            let frame = CGRect(x: xOffset, y: 0, width: unitWidth, height: headerHeight)
+//            let attributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: MTDayHeader.reuseId, with: indexPath)
+//            attributes.frame = frame
+//            result[indexPath] = attributes
+//            xOffset += unitWidth
+//        }
+//
+//        return result
+//    }
+//
+//    func layoutAttributesForTimelineView() -> [IndexPath: UICollectionViewLayoutAttributes] {
+//        var result = [IndexPath: UICollectionViewLayoutAttributes]()
+//
+//        var yOffset: CGFloat = headerHeight
+//        for count in range.start.hour ... range.end.hour {
+//            let indexPath = IndexPath(item: count, section: config.totalDays)
+//            let frame = CGRect(x: 0, y: yOffset, width: 40, height: unitHeight + config.gridLineThickness)
+//            let attributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: MTTimelineHeader.reuseId, with: indexPath)
+//            attributes.frame = frame
+//            attributes.zIndex = 1
+//            result[indexPath] = attributes
+//            yOffset += unitHeight
+//
+//        }
+//        return result
+//    }
+//
+//    override var collectionViewContentSize: CGSize {
+//        guard let collectionView = collectionView else { return .zero }
+//        let width = collectionView.bounds.width
+//        let height = headerHeight + (heightPerHour * CGFloat(totalHours)) + unitHeight
+//        return CGSize(width: width, height: height)
+//    }
+//
+//    override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
+//        var visibleAttributes = [UICollectionViewLayoutAttributes]()
+//
+//        for attribute in allAttributes {
+//            if attribute.frame.intersects(rect) {
+//                visibleAttributes.append(attribute)
+//            }
+//        }
+//        return visibleAttributes
+//    }
+//
+//    override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+//        eventCache[indexPath.item]
+//    }
+//
 }
-
+//
 
 
 
