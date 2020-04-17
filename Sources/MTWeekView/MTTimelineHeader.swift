@@ -27,7 +27,7 @@ class MTTimelineHeader: UICollectionReusableView, ReusableView {
         super.init(frame: frame)
         self.translatesAutoresizingMaskIntoConstraints = false
         let colors: [UIColor] = [.systemBlue, .systemGreen, .systemRed, .systemYellow, .systemGray]
-        backgroundColor = .clear
+//        backgroundColor = colors.randomElement()!
         self.addSubview(label)
         
         NSLayoutConstraint.activate([

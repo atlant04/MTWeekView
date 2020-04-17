@@ -10,7 +10,7 @@ import UIKit
 
 class MTDayHeader: UICollectionReusableView, ReusableView {
     func configure(with indexPath: IndexPath) {
-        label.text = Day.allCases[indexPath.section].name
+        label.text = Day.allCases[indexPath.item].name
     }
     
     typealias DataType = Day
@@ -30,6 +30,7 @@ class MTDayHeader: UICollectionReusableView, ReusableView {
             label.centerXAnchor.constraint(equalTo: self.centerXAnchor),
             label.widthAnchor.constraint(equalToConstant: self.bounds.width)
         ])
+//        backgroundColor = .purple
     }
     
     required init?(coder: NSCoder) {

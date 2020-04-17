@@ -8,15 +8,25 @@
 
 import Foundation
 
-public protocol MTSelfConfiguringEventCell {
-    static var reuseId: String { get }
-    func configure(with data: Event)
+public protocol Event {
+    var day: Day { get set }
+    var start: Time { get }
+    var end: Time { get }
 }
 
-extension MTSelfConfiguringEventCell {
+public protocol MTConfigurableCell {
+    static var reuseId: String { get }
+    func configure(with event: Event)
+}
+
+extension MTConfigurableCell {
     static var reuseId: String {
         return String(describing: self)
     }
+}
+
+public extension MTWeekViewDataSource {
+    func weekView(_ weekView: MTWeekView, eventsForDay day: Day) -> [Event] { [] }
 }
 
 protocol ReusableView {
