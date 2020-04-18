@@ -41,8 +41,8 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
     }
 
     public func invalidate() {
+        layout.clearCache()
         collectionView.reloadData()
-        layout.invalidateLayout()
     }
 
     override open var intrinsicContentSize: CGSize {
@@ -98,7 +98,8 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
     }
 
     internal func events(for day: Day) -> [Event]? {
-        if let events = allEvents[day] {
+        let events = selectedEvents ?? allEvents
+        if let events = events[day] {
             return Array(events)
         }
         return nil

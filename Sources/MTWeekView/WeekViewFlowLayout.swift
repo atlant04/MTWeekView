@@ -64,13 +64,6 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
-    override func invalidateLayout() {
-        allAttributes = []
-        eventCache = []
-        //resetParams()
-        super.invalidateLayout()
-    }
     
     override func prepare() {
         guard allAttributes.isEmpty else { return }
@@ -87,6 +80,11 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
 
     func resetParams() {
         headerHeight = 10
+    }
+
+    func clearCache() {
+        allAttributes = []
+        eventCache = []
     }
 
     func calculateParams() {
@@ -108,9 +106,11 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
     }
 
     func layout() {
-        layoutHeader()
-        layoutTimeline()
-        layoutGrid()
+        if timelineCache.isEmpty {
+            layoutHeader()
+            layoutTimeline()
+            layoutGrid()
+        }
         layoutEvents()
     }
     
