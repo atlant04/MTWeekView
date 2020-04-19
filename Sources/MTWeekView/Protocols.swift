@@ -8,11 +8,34 @@
 
 import Foundation
 
-public protocol Event {
+public protocol Event: Codable, Equal {
     var day: Day { get set }
-    var start: Time { get }
-    var end: Time { get }
+    var start: Time { get set }
+    var end: Time { get set }
 }
+
+public protocol Equal {
+    var id: UUID { get }
+}
+
+public extension Equal {
+    var id: UUID {
+        return UUID()
+    }
+}
+
+public extension Event {
+    static func == (lhs: Event, rhs: Event) -> Bool {
+        return lhs.id == rhs.id
+    }
+}
+
+
+//extension Event: Equatable {
+//    static func == (lhs: Event, rhs: Event) -> Bool {
+//        return lhs.day == rhs.day && lhs.start == rhs.start && lhs.end == rhs.end
+//    }
+//}
 
 public protocol MTConfigurableCell {
     static var reuseId: String { get }
@@ -20,7 +43,7 @@ public protocol MTConfigurableCell {
 }
 
 extension MTConfigurableCell {
-    static var reuseId: String {
+    public static var reuseId: String {
         return String(describing: self)
     }
 }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Time {
+public struct Time: Codable {
     public var hour: Int
     public var minute: Int
 
@@ -28,6 +28,12 @@ public struct Time {
 extension Time: Comparable {
     public static func < (lhs: Time, rhs: Time) -> Bool {
         lhs.hour < rhs.hour && lhs.minute < rhs.minute
+    }
+}
+
+extension Time: Equatable {
+    public static func == (lhs: Time, rhs: Time) -> Bool {
+        return lhs.hour == rhs.hour && lhs.minute == lhs.minute
     }
 }
 

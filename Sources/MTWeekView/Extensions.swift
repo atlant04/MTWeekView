@@ -53,3 +53,12 @@ extension UIView {
         ])
     }
 }
+
+extension Encodable {
+    func toJSONData() throws -> Data? { try JSONEncoder().encode(self) }
+
+}
+
+extension Decodable {
+}
+

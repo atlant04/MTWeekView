@@ -18,6 +18,7 @@ internal protocol MTWeekViewCollectionLayoutDelegate {
 internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
     
     var delegate: MTWeekViewCollectionLayoutDelegate?
+    var coordinator: DragDropCoordinator!
     
     var headerHeight: CGFloat = 30
     var timelineWidth: CGFloat = 40
@@ -41,7 +42,11 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
     var headerCache: AttDict = [:]
     var timelineCache: AttDict = [:]
     var gridCache: AttDict = [:]
-    var eventCache: [UICollectionViewLayoutAttributes] = []
+    var eventCache: AttDict = [:]
+
+    var sectionsBounds: [Int: ClosedRange<CGFloat>] = [:]
+    var timelineBounds: [Int: ClosedRange<CGFloat>] = [:]
+    var grid: Grid!
     
     var config: LayoutConfiguration
     var range: (start: Time, end: Time)
@@ -70,11 +75,13 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
 
         calculateParams()
         layout()
+        populateBounds()
+        populateTimelineBounds()
             
         allAttributes.append(contentsOf: headerCache.values)
         allAttributes.append(contentsOf: timelineCache.values)
         allAttributes.append(contentsOf: gridCache.values)
-        allAttributes.append(contentsOf: eventCache)
+        allAttributes.append(contentsOf: eventCache.values)
         
     }
 
@@ -84,7 +91,7 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
 
     func clearCache() {
         allAttributes = []
-        eventCache = []
+        eventCache = [:]
     }
 
     func calculateParams() {
@@ -101,7 +108,7 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
         unitHeight = gridHeight / CGFloat(horizontalLineCount)
         unitWidth = gridWidth / CGFloat(config.totalDays)
 
-        //headerHeight = headerHeight + unitHeight / 2
+        grid = Grid(frame: CGRect(x: timelineWidth, y: headerHeight * 3 / 2 , width: gridWidth, height: gridHeight))
 
     }
 
@@ -112,6 +119,55 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
             layoutGrid()
         }
         layoutEvents()
+    }
+
+    func updateEvent(_ event: inout Event, for rect: CGRect) {
+        event.day = .Monday
+    }
+
+    func populateBounds() {
+        for (indexPath, attributes) in headerCache {
+            let range: ClosedRange<CGFloat> = attributes.frame.minX ... attributes.frame.maxX
+            sectionsBounds[indexPath.item] = range
+        }
+    }
+
+    func populateTimelineBounds() {
+        for (indexPath, attributes) in timelineCache {
+            let frame = collectionView!.convert(attributes.frame, to: grid)
+            let range: ClosedRange<CGFloat> = frame.minY ... frame.maxY
+            timelineBounds[indexPath.item] = range
+        }
+    }
+
+    func daySection(at point: CGPoint) -> Int? {
+        for (section, range) in sectionsBounds {
+            if case range = point.x {
+                return section
+            }
+        }
+        return nil
+    }
+
+    func time(at rect: CGRect) -> Time? {
+        for (hour, range) in timelineBounds {
+            if range.contains(rect.minY) {
+                let minuteOffset = rect.minY - range.lowerBound - headerHeight
+                let minutes: Int
+                if minuteOffset < 7 {
+                    minutes = 0
+                } else {
+                    minutes = Int(minuteOffset / unitHeight * 60)
+                }
+                return Time(hour: hour, minute: minutes)
+            }
+        }
+        return nil
+    }
+
+    func rect(section: Int) -> CGRect? {
+        let indexPath = IndexPath(item: section, section: Sections.Header.rawValue)
+        return headerCache[indexPath]?.frame
     }
     
     func layoutGrid() {
@@ -135,6 +191,7 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
 
         for (indexPath, timeLineAtt) in timelineCache {
             var origin = timeLineAtt.frame.center
+            print(origin)
             origin.x = timelineWidth
 
             let frame = CGRect(origin: origin, size: CGSize(width: gridWidth, height: lineWidth))
@@ -158,7 +215,7 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
                 let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
                 attributes.frame = frame
                 attributes.zIndex = 1
-                eventCache.append(attributes)
+                eventCache[indexPath] = attributes
             }
         }
     }
@@ -239,6 +296,9 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
     }
 
     override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-        eventCache[indexPath.item]
+        eventCache[indexPath]
     }
+
+    var initialLocation: CGPoint?
 }
+

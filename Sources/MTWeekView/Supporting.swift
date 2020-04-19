@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-public enum Day: Int, CaseIterable {
+public enum Day: Int, CaseIterable, Codable {
     case Monday, Tuesday, Wednesday, Thursday, Friday
     
     var index: Int {
