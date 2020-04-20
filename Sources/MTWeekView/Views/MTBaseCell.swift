@@ -28,10 +28,6 @@ open class MTBaseCell: UICollectionViewCell, MTConfigurableCell, UIDropInteracti
     let view = UIView()
     override public init(frame: CGRect) {
         super.init(frame: frame)
-//        let shape = CAShapeLayer()
-//        shape.fillColor = UIColor.systemBlue.cgColor
-//        shape.frame = CGRect(x: 0, y: 0, width: 2, height: contentView.frame.height)
-//        contentView.layer.addSublayer(shape)
 
         view.backgroundColor = .systemBlue
         contentView.addSubview(view)

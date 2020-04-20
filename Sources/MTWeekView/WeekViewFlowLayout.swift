@@ -218,9 +218,11 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
         for day in Day.allCases {
             guard let events = delegate?.events(for: day) else { continue }
 
+            var framesForSection = [CGRect]()
             for (index, event) in events.enumerated() {
                 guard var frame = frame(for: event) else { continue }
-                adjustFrameIfNeeded(&frame, in: day.index)
+                adjustFrameIfNeeded(&frame, in: framesForSection)
+                framesForSection.append(frame)
                 let indexPath = IndexPath(item: index, section: day.index)
                 let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
                 attributes.frame = frame
@@ -230,13 +232,17 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
         }
     }
 
-    func adjustFrameIfNeeded(_ frame: inout CGRect, in section: Int) {
-        for (_, attributes) in eventCache {
-            if attributes.frame.intersects(frame) {
-                frame.origin.x += 4
-                frame.size.width -= 4
+    func adjustFrameIfNeeded(_ frame: inout CGRect, in frames: [CGRect]) {
+        var intersections: CGFloat = 0
+
+        for otherFrame in frames {
+            if frame.intersects(otherFrame) {
+                intersections += 1
             }
         }
+
+        frame.origin.x += intersections * 4
+        frame.size.width -= intersections * 4
     }
 
     func frame(for event: Event) -> CGRect? {
