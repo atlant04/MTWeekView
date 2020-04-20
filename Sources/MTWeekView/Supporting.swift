@@ -24,8 +24,9 @@ public enum Day: Int, CaseIterable, Codable {
 public struct LayoutConfiguration {
     public init() { }
     
-    var start: Time = Time(hour: 8, minute: 0)
-    var end: Time = Time(hour: 20, minute: 0)
+    public var start: Time = Time(hour: 8, minute: 0)
+    public var end: Time = Time(hour: 20, minute: 0)
+    public var hidesVerticalLines: Bool = false
 
     var range: (start: Time, end: Time) {
         return (start: start, end: end)
@@ -33,6 +34,6 @@ public struct LayoutConfiguration {
     
     var interval: Time = Time(hour: 1, minute: 0)
     var totalDays: Int = 5
-    var gridLineThickness: CGFloat =  1
+    public var gridLineThickness: CGFloat =  1
 }
 

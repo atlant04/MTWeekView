@@ -192,6 +192,7 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
             let attributes = Attributes(forDecorationViewOfKind: MTGridLine.reuseId, with: indexPath)
             attributes.frame = frame
             attributes.zIndex = 2
+            attributes.isHidden = config.hidesVerticalLines
 
             gridCache[indexPath] = attributes
 
@@ -217,12 +218,22 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
             guard let events = delegate?.events(for: day) else { continue }
 
             for (index, event) in events.enumerated() {
-                guard let frame = frame(for: event) else { continue }
+                guard var frame = frame(for: event) else { continue }
+                adjustFrameIfNeeded(&frame, in: day.index)
                 let indexPath = IndexPath(item: index, section: day.index)
                 let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
                 attributes.frame = frame
                 attributes.zIndex = 1
                 eventCache[indexPath] = attributes
+            }
+        }
+    }
+
+    func adjustFrameIfNeeded(_ frame: inout CGRect, in section: Int) {
+        for (_, attributes) in eventCache {
+            if attributes.frame.intersects(frame) {
+                frame.origin.x += 4
+                frame.size.width -= 4
             }
         }
     }
@@ -247,7 +258,7 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
         let endMinY = CGFloat(event.end.minute) * unitHeight / 60
         let height = endHourY + endMinY - startY
 
-        let xOffset = dayAttributes.frame.origin.x
+        let xOffset = dayAttributes.frame.origin.x + lineWidth
         let frame = CGRect(x: xOffset, y: startY, width: unitWidth, height: height)
         let insets = UIEdgeInsets(top: lineWidth, left: lineWidth, bottom: 0, right: 0)
         return frame.inset(by: insets)

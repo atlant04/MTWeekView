@@ -43,7 +43,6 @@ class DragDropCoordinator {
                 cell.overlayed = true
                 return cell
             }
-
             cell.overlayed = false
         }
         
@@ -66,7 +65,7 @@ extension MTWeekView: UICollectionViewDropDelegate {
         let start = layout.time(at: context.currentFrame(at: finalLocation))
         let end = start + (context.event.end - context.event.start)
         
-        eventProvider?.move(event: context.cell.event, to: day, start: start, end: end)
+        eventProvider?.move(context.cell.event, to: day, start: start, end: end)
         invalidate()
 
     }
@@ -82,7 +81,7 @@ extension MTWeekView: UICollectionViewDropDelegate {
 
         let location = session.location(in: collectionView)
         if let cell = context.intersects(at: location) {
-            print("Intersecting")
+//            cell.overlayed = true
         }
         return UICollectionViewDropProposal(operation: .move)
     }
