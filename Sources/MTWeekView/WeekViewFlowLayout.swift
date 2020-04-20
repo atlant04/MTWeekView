@@ -220,12 +220,12 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
 
             for (index, event) in events.enumerated() {
                 guard var frame = frame(for: event) else { continue }
+                adjustFrameIfNeeded(&frame, in: day.index)
                 let indexPath = IndexPath(item: index, section: day.index)
                 let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
                 attributes.frame = frame
                 attributes.zIndex = 1
                 eventCache[indexPath] = attributes
-                adjustFrameIfNeeded(&frame, in: day.index)
             }
         }
     }

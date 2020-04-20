@@ -25,6 +25,7 @@ open class MTBaseCell: UICollectionViewCell, MTConfigurableCell, UIDropInteracti
         self.event = event
     }
 
+    let view = UIView()
     override public init(frame: CGRect) {
         super.init(frame: frame)
 //        let shape = CAShapeLayer()
@@ -32,13 +33,16 @@ open class MTBaseCell: UICollectionViewCell, MTConfigurableCell, UIDropInteracti
 //        shape.frame = CGRect(x: 0, y: 0, width: 2, height: contentView.frame.height)
 //        contentView.layer.addSublayer(shape)
 
-        let view = UIView()
         view.backgroundColor = .systemBlue
-        view.frame = CGRect(x: 0, y: 0, width: 2, height: contentView.frame.height)
         contentView.addSubview(view)
 
 //        let interaction = UIDropInteraction(delegate: self)
 //        addInteraction(interaction)
+    }
+
+    open override func layoutSubviews() {
+        super.layoutSubviews()
+        view.frame = CGRect(x: 0, y: 0, width: 2, height: frame.height)
     }
 
     required public init?(coder: NSCoder) {
