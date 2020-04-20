@@ -206,6 +206,7 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
             let attributes = Attributes(forDecorationViewOfKind: MTGridLine.reuseId, with: indexPath)
             attributes.frame = frame
             attributes.zIndex = 0
+            attributes.alpha = 0.3
 
             gridCache[indexPath] = attributes
 

@@ -21,7 +21,7 @@ open class MTBaseCell: UICollectionViewCell, MTConfigurableCell, UIDropInteracti
         }
     }
 
-    public func configure(with event: Event) {
+    open func configure(with event: Event) {
         self.event = event
     }
 
