@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import MobileCoreServices
 
 public protocol MTWeekViewDataSource {
     func weekView(_ weekView: MTWeekView, eventsForDay day: Day) -> [Event]
@@ -71,6 +72,7 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
         collectionView.fill(view: self)
         collectionView.dragDelegate = self
         collectionView.dropDelegate = self
+        collectionView.dragInteractionEnabled = true
     }
     
     

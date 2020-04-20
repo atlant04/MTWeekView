@@ -31,6 +31,7 @@ open class MTBaseCell: UICollectionViewCell, MTConfigurableCell, UIDropInteracti
 
         view.backgroundColor = .systemBlue
         contentView.addSubview(view)
+        self.isUserInteractionEnabled = true
 
 //        let interaction = UIDropInteraction(delegate: self)
 //        addInteraction(interaction)
