@@ -56,8 +56,7 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
     //MARK: Private
 
     internal var layout: MTWeekViewCollectionLayout!
-    internal var allEvents: [Day: [Event]] = [:]
-    internal var selectedEvents: [Day: [Event]]?
+    internal var eventProvider: EventsProvider?
 
     var MainCellType: MTBaseCell.Type?
 
@@ -76,13 +75,13 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
     
     
     private func getEvents() {
-        for day in Day.allCases {
-            guard let events = dataSource?.weekView(self, eventsForDay: day) else { continue }
-            allEvents[day] = events
-        }
+//        for day in Day.allCases {
+//            guard let events = dataSource?.weekView(self, eventsForDay: day) else { continue }
+//            allEvents[day] = events
+//        }
 
         guard let events = dataSource?.allEvents(for: self) else { return }
-        allEvents = Dictionary(grouping: events, by: { $0.day } )
+        eventProvider = EventsProvider(events: events)
     }
     
     private func setupCollectionView() {
@@ -98,11 +97,7 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
     }
 
     internal func events(for day: Day) -> [Event]? {
-        let events = selectedEvents ?? allEvents
-        if let events = events[day] {
-            return Array(events)
-        }
-        return nil
+        return eventProvider?.events(for: day)
     }
 
 }
@@ -111,14 +106,12 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
 
 extension MTWeekView {
     public func showEvents(where condition: (Event) -> Bool) {
-        selectedEvents = allEvents.mapValues { events in
-            return events.filter(condition)
-        }
+        eventProvider?.selectEvents(where: condition)
         invalidate()
     }
 
     public func showAll() {
-        selectedEvents = nil
+        eventProvider?.populate()
         invalidate()
     }
 
@@ -135,19 +128,17 @@ extension MTWeekView: UICollectionViewDelegate, UICollectionViewDataSource {
     }
 
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        let day: Day = Day(rawValue: section) ?? .Monday
-        let events = selectedEvents ?? allEvents
-        return events[day]?.count ?? 0
+        guard let day = Day(rawValue: section) else { return 0 }
+        return eventProvider?.numberOfEvents(for: day) ?? 0
     }
 
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let Type = self.MainCellType else { fatalError("Must Register a Week View Cell first") }
 
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Type.reuseId, for: indexPath)
-        let eventsToShow = selectedEvents ?? allEvents
 
-        if let cell = cell as? MTBaseCell {
-            if let event = event(at: indexPath, in: eventsToShow) {
+        if let event = eventProvider?.event(at: indexPath) {
+            if let cell = cell as? MTBaseCell {
                 cell.configure(with: event)
             }
         }
@@ -162,39 +153,26 @@ extension MTWeekView: UICollectionViewDelegate, UICollectionViewDataSource {
         return view
     }
 
-    func event(at indexPath: IndexPath, in collection: [Day: [Event]]) -> Event? {
-        if let day = Day(rawValue: indexPath.section) {
-            return collection[day]?[indexPath.item]
-        }
-        return nil
-    }
 }
+
 
 extension MTWeekView: UICollectionViewDragDelegate {
     public func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
-        let currentEvents = selectedEvents ?? allEvents
-        let location = session.location(in: collectionView)
-        guard
-            let indexPath = collectionView.indexPathForItem(at: location),
-            let cell = collectionView.cellForItem(at: indexPath) as? MTBaseCell
-        else { return [] }
 
-        layout.coordinator?.initialLocation = collectionView.convert(location, from: layout.grid)
+        let location = session.location(in: collectionView)
+        guard let cell = collectionView.cellForItem(at: indexPath) as? MTBaseCell else { return [] }
         
-        if let event = event(at: indexPath, in: currentEvents) {
+        if let event = eventProvider?.event(at: indexPath) {
             let provider = NSItemProvider(object: AnyEvent(event: event))
             let dragItem = UIDragItem(itemProvider: provider)
-            dragItem.localObject = event
-            layout.coordinator = DragDropCoordinator(for: cell, in: session)
-            layout.coordinator.oldEvent = event
+
+            let coordinator = DragDropCoordinator(for: collectionView, position: location, sourceIndexPath: indexPath)
+            session.localContext = coordinator
+
             return [dragItem]
         }
 
         return []
-    }
-
-    public func collectionView(_ collectionView: UICollectionView, dragSessionWillBegin session: UIDragSession) {
-
     }
 
 }
@@ -202,6 +180,9 @@ extension MTWeekView: UICollectionViewDragDelegate {
 
 
 struct ConcreteEvent: Event, Codable {
+
+    var id: UUID = UUID()
+
     var day: Day
     var start: Time
     var end: Time

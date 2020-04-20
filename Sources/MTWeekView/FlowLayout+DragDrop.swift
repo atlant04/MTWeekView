@@ -8,70 +8,66 @@
 import UIKit
 
 class DragDropCoordinator {
+
     var cell: MTBaseCell
-    var session: UIDragDropSession
-    var initialLocation: CGPoint?
+    var initialTapLocation: CGPoint
+    var sourceIndexPath: IndexPath
+    var collectionView: UICollectionView
 
-    var oldEvent: Event?
+    var event: Event {
+        return cell.event
+    }
 
-    init(for cell: MTBaseCell, in session: UIDragDropSession) {
-        self.cell = cell
-        self.session = session
+    init(for view: UICollectionView, position: CGPoint, sourceIndexPath: IndexPath) {
+        self.cell = view.cellForItem(at: sourceIndexPath) as! MTBaseCell
+        self.collectionView = view
+        self.sourceIndexPath = sourceIndexPath
+        self.initialTapLocation = position
+    }
+
+    func currentFrame(at location: CGPoint) -> CGRect {
+        var frame = cell.frame
+
+        frame.origin.x += location.x - initialTapLocation.x
+        frame.origin.y += location.y - initialTapLocation.y
+
+        return frame
+    }
+
+    func intersects(at location: CGPoint) -> MTBaseCell? {
+        let frame = currentFrame(at: location)
+        guard let cells = collectionView.visibleCells as? [MTBaseCell] else { return nil }
+
+        for cell in cells {
+            if cell.frame.intersects(frame) && cell != self.cell {
+                cell.overlayed = true
+                return cell
+            }
+
+            cell.overlayed = false
+        }
+        
+        return nil
     }
     
 }
 
 extension MTWeekView: UICollectionViewDropDelegate {
 
-    func coordinates() -> CGPoint {
-        let location = layout.coordinator.session.location(in: collectionView!)
-        return collectionView!.convert(location, from: layout.grid)
-    }
-
     public func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator) {
-        var location = coordinates()
+        let finalLocation = coordinator.session.location(in: collectionView)
 
-        guard let item = coordinator.items.first else { return }
-        guard let section = layout.daySection(at: location) else { return }
-        let newFrame = CGRect(center: coordinates(), size: item.previewSize)
+        guard
+            let context = coordinator.session.localDragSession?.localContext as? DragDropCoordinator,
+            let section = layout.daySection(at: finalLocation),
+            let day = Day(rawValue: section)
+        else { return }
 
-        if let oldEvent = self.layout.coordinator.oldEvent,
-            let newStart = layout.time(at: newFrame),
-            let day = Day(rawValue: section) {
-            print(newStart)
-
-            let newEnd = newStart + (oldEvent.end - oldEvent.start)
-            let newEvent = ConcreteEvent(day: day, start: newStart, end: newEnd)
-
-            print(newEvent)
-            let oldDay = Day(rawValue: item.sourceIndexPath!.section)
-            let num = collectionView.numberOfItems(inSection: section)
-            let finalIndexPath = IndexPath(item: num, section: section)
-            if item.sourceIndexPath?.section != section {
-                selectedEvents?[oldDay!]?.remove(at: item.sourceIndexPath!.item)
-                selectedEvents?[day]?.append(newEvent)
-                collectionView.moveItem(at: item.sourceIndexPath!, to: finalIndexPath)
-            } else {
-                var huh = selectedEvents?[oldDay!]?.first { event in
-                    print(event.id)
-                    print(oldEvent.id)
-                    return event.id == oldEvent.id
-
-                }
-                huh!.start = newStart
-                huh!.end = newEnd
-            }
-            coordinator.drop(item.dragItem, toItemAt: finalIndexPath)
-    }
-        //collectionView.performBatchUpdates({
-            //collectionView.reloadData()
-            //invalidate()
-            //collectionView.insertItems(at: [finalIndexPath])
-            //collectionView.moveItem(at: item.sourceIndexPath!, to: finalIndexPath)
-//            collectionView.deleteItems(at: [item.sourceIndexPath!])
-            reload()
-        //}, completion: { _ in
-        //})
+        let start = layout.time(at: context.currentFrame(at: finalLocation))
+        let end = start + (context.event.end - context.event.start)
+        
+        eventProvider?.move(event: context.cell.event, to: day, start: start, end: end)
+        invalidate()
 
     }
 
@@ -81,14 +77,14 @@ extension MTWeekView: UICollectionViewDropDelegate {
     }
 
     public func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
-        let location = layout.coordinator?.session.location(in: collectionView)
-//        print("View: \(location)")
-//        print("Grid: \(collectionView.convert(location!, to: grid))")
-        return UICollectionViewDropProposal(operation: .move)
-    }
+        let proposal = UICollectionViewDropProposal(operation: .move)
+        guard let context = session.localDragSession?.localContext as? DragDropCoordinator else { return proposal }
 
-    public func collectionView(_ collectionView: UICollectionView, dropSessionDidEnter session: UIDropSession) {
-        layout.coordinator?.session = session
+        let location = session.location(in: collectionView)
+        if let cell = context.intersects(at: location) {
+            print("Intersecting")
+        }
+        return UICollectionViewDropProposal(operation: .move)
     }
 
 

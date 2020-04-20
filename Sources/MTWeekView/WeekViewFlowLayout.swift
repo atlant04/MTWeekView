@@ -134,8 +134,8 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
 
     func populateTimelineBounds() {
         for (indexPath, attributes) in timelineCache {
-            let frame = collectionView!.convert(attributes.frame, to: grid)
-            let range: ClosedRange<CGFloat> = frame.minY ... frame.maxY
+            let frame = attributes.frame
+            let range: ClosedRange<CGFloat> = frame.centerY ... frame.minY + frame.height + lineWidth
             timelineBounds[indexPath.item] = range
         }
     }
@@ -149,20 +149,28 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
         return nil
     }
 
-    func time(at rect: CGRect) -> Time? {
-        for (hour, range) in timelineBounds {
-            if range.contains(rect.minY) {
-                let minuteOffset = rect.minY - range.lowerBound - headerHeight
-                let minutes: Int
-                if minuteOffset < 7 {
-                    minutes = 0
-                } else {
-                    minutes = Int(minuteOffset / unitHeight * 60)
-                }
-                return Time(hour: hour, minute: minutes)
-            }
+    func map(_ value: CGFloat, _ minVal: CGFloat, _ maxVal: CGFloat, _ min: CGFloat, _ max: CGFloat) -> CGFloat {
+        return (value - minVal) / (maxVal - minVal) * (max - min) + min
+    }
+
+    func time(at rect: CGRect) -> Time {
+        let minY = headerHeight / 2 + unitHeight / 2
+        let maxY = minY + gridHeight
+        let minTime = CGFloat(config.range.start.hour)
+        let maxTime = CGFloat(config.range.end.hour)
+
+        let time = map(rect.minY, minY, maxY, minTime, maxTime)
+        if time < minTime {
+            return config.start
+        } else if time > maxTime {
+            return config.end
+        } else {
+            let decimal = time.truncatingRemainder(dividingBy: 1.0)
+            let hour = Int(time)
+            let minute = decimal < 0.05 || decimal > 0.95 ? 0 : Int(decimal * 60)
+            return Time(hour: hour, minute: minute)
         }
-        return nil
+
     }
 
     func rect(section: Int) -> CGRect? {
@@ -191,7 +199,6 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
 
         for (indexPath, timeLineAtt) in timelineCache {
             var origin = timeLineAtt.frame.center
-            print(origin)
             origin.x = timelineWidth
 
             let frame = CGRect(origin: origin, size: CGSize(width: gridWidth, height: lineWidth))

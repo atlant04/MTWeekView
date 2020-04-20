@@ -18,12 +18,6 @@ public protocol Equal {
     var id: UUID { get }
 }
 
-public extension Equal {
-    var id: UUID {
-        return UUID()
-    }
-}
-
 public extension Event {
     static func == (lhs: Event, rhs: Event) -> Bool {
         return lhs.id == rhs.id
