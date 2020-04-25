@@ -213,44 +213,120 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
         }
     }
 
+    class ClusterNode: CustomDebugStringConvertible {
+        var attribute: Attributes
+        var next: ClusterNode?
+
+        init(attribute: Attributes) {
+            self.attribute = attribute
+        }
+
+        var debugDescription: String {
+            """
+            Item: \(attribute.indexPath.item)
+            X:    \(attribute.frame.origin.x)
+            """
+        }
+
+        func lastIntersection(with cluster: ClusterNode) -> ClusterNode? {
+            var curr: ClusterNode? = self
+            var last: ClusterNode? = nil
+
+            while curr != nil {
+                if curr!.attribute.frame.intersects(cluster.attribute.frame) {
+                    last = curr
+                }
+                curr = curr?.next
+            }
+
+            return last
+            //return _lastIntersection(curr: self, cluster: cluster)
+        }
+
+//        func _lastIntersection(curr: ClusterNode?, cluster: ClusterNode) -> ClusterNode? {
+//            guard let curr = curr else { return nil }
+//
+//            if !curr.attribute.frame.intersects(cluster.attribute.frame) {
+//                if curr.next != nil {
+//                    return nil
+//                }
+//            }
+//
+//            return _lastIntersection(curr: curr.next, cluster: cluster)
+//        }
+
+        func insert(_ cluster: ClusterNode) {
+            let temp = self.next
+            self.next = cluster
+            cluster.next = temp
+
+            let rect = self.attribute.frame.intersection(cluster.attribute.frame)
+            print(rect.height)
+            print(attribute.frame.height)
+
+            if rect.height / self.attribute.frame.height > 0.8 {
+                attribute.frame.size.width = attribute.frame.size.width / 2
+                cluster.attribute.frame.size.width = attribute.frame.size.width
+                cluster.attribute.frame.origin.x = attribute.frame.maxX
+            } else {
+                let newX = self.attribute.frame.origin.x + 4
+                cluster.attribute.frame.origin.x = newX
+            }
+        }
+    }
     
     func layoutEvents() {
         for day in Day.allCases {
             guard let events = delegate?.events(for: day) else { continue }
 
-            var allAtributes = [Attributes]()
+            var clusters = [ClusterNode]()
             for (index, event) in events.enumerated() {
                 guard let frame = frame(for: event) else { continue }
                 let indexPath = IndexPath(item: index, section: day.index)
                 let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
                 attributes.frame = frame
                 attributes.zIndex = 1
-                adjustFramesIfNeeded(attributes, in: allAtributes)
-                allAtributes.append(attributes)
+                insertCluster(attributes, in: &clusters)
                 eventCache[indexPath] = attributes
             }
         }
     }
 
-    func adjustFramesIfNeeded(_ attribute: Attributes, in allAttributes: [Attributes]) {
-        var intersections: CGFloat = 0
+    func insertCluster(_ attribute: Attributes, in clusters: inout [ClusterNode]) {
+        let newCluster = ClusterNode(attribute: attribute)
 
-        for attr in allAttributes {
-            if attr.frame.minY == attribute.frame.minY {
-                let newWidth = attr.frame.width / 2
-                attribute.frame.size.width = newWidth
-                attr.frame.size.width = newWidth
-                attribute.frame.origin.x = attr.frame.origin.x + attribute.size.width
+        for cluster in clusters {
+            if let last = cluster.lastIntersection(with: newCluster) {
+                last.insert(newCluster)
+//                print(String(reflecting: last))
+//                print(String(reflecting: newCluster))
                 return
-            }
-            if attribute.frame.intersects(attr.frame) {
-                intersections += 1
             }
         }
 
-        attribute.frame.origin.x += intersections * 4
-        attribute.frame.size.width -= intersections * 4
+        clusters.append(newCluster)
+
     }
+
+//    func insertCluster(_ attribute: Attributes, in allAttributes: [ClusterNode]) {
+//        var intersections: CGFloat = 0
+//
+//        for attr in allAttributes {
+//            if attr.frame.minY == attribute.frame.minY {
+//                let newWidth = attr.frame.width / 2
+//                attribute.frame.size.width = newWidth
+//                attr.frame.size.width = newWidth
+//                attribute.frame.origin.x = attr.frame.origin.x + attribute.size.width
+//                return
+//            }
+//            if attribute.frame.intersects(attr.frame) {
+//                intersections += 1
+//            }
+//        }
+//
+//        attribute.frame.origin.x += intersections * 4
+//        attribute.frame.size.width -= intersections * 4
+//    }
 
     func frame(for event: Event) -> CGRect? {
 
