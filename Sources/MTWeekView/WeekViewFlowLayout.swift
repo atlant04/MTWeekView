@@ -218,31 +218,38 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
         for day in Day.allCases {
             guard let events = delegate?.events(for: day) else { continue }
 
-            var framesForSection = [CGRect]()
+            var allAtributes = [Attributes]()
             for (index, event) in events.enumerated() {
-                guard var frame = frame(for: event) else { continue }
-                adjustFrameIfNeeded(&frame, in: framesForSection)
-                framesForSection.append(frame)
+                guard let frame = frame(for: event) else { continue }
                 let indexPath = IndexPath(item: index, section: day.index)
                 let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
                 attributes.frame = frame
                 attributes.zIndex = 1
+                adjustFramesIfNeeded(attributes, in: allAtributes)
+                allAtributes.append(attributes)
                 eventCache[indexPath] = attributes
             }
         }
     }
 
-    func adjustFrameIfNeeded(_ frame: inout CGRect, in frames: [CGRect]) {
+    func adjustFramesIfNeeded(_ attribute: Attributes, in allAttributes: [Attributes]) {
         var intersections: CGFloat = 0
 
-        for otherFrame in frames {
-            if frame.intersects(otherFrame) {
+        for attr in allAttributes {
+            if attr.frame.minY == attribute.frame.minY {
+                let newWidth = attr.frame.width / 2
+                attribute.frame.size.width = newWidth
+                attr.frame.size.width = newWidth
+                attribute.frame.origin.x = attr.frame.origin.x + attribute.size.width
+                return
+            }
+            if attribute.frame.intersects(attr.frame) {
                 intersections += 1
             }
         }
 
-        frame.origin.x += intersections * 4
-        frame.size.width -= intersections * 4
+        attribute.frame.origin.x += intersections * 4
+        attribute.frame.size.width -= intersections * 4
     }
 
     func frame(for event: Event) -> CGRect? {
