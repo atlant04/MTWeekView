@@ -71,6 +71,7 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
         collectionView.fill(view: self)
         collectionView.dragDelegate = self
         collectionView.dropDelegate = self
+        register(MTBaseCell.self)
     }
     
     
