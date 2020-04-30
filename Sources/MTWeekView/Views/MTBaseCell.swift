@@ -39,7 +39,7 @@ open class MTBaseCell: UICollectionViewCell, MTConfigurableCell, UIDropInteracti
 
     open override func layoutSubviews() {
         super.layoutSubviews()
-        view.frame = CGRect(x: 0, y: 0, width: 2, height: frame.height)
+        view.frame = CGRect(x: 1, y: 0, width: 2, height: frame.height)
     }
 
     required public init?(coder: NSCoder) {

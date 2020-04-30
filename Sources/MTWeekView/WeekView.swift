@@ -21,7 +21,7 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
     public var dataSource: MTWeekViewDataSource? {
         didSet { reload() }
     }
-    public var collectionView: UICollectionView!
+    public var collectionView: MTCollectionView!
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -46,6 +46,10 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
         collectionView.reloadData()
     }
 
+    public func reloadDays(days: [Day]) {
+        collectionView.reloadSections(IndexSet(days.map { $0.rawValue }))
+    }
+
     override open var intrinsicContentSize: CGSize {
         return layout.collectionViewContentSize
     }
@@ -65,7 +69,7 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
     private func commonInit() {
         layout = MTWeekViewCollectionLayout(configuration: configuration)
         layout.delegate = self
-        collectionView = UICollectionView(frame: self.bounds, collectionViewLayout: layout!)
+        collectionView = MTCollectionView(frame: self.bounds, collectionViewLayout: layout!)
         registerClasses()
         setupCollectionView()
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -101,7 +105,6 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
     internal func events(for day: Day) -> [Event]? {
         return eventProvider?.events(for: day)
     }
-
 }
 
 //MARK: Public API
@@ -135,7 +138,7 @@ extension MTWeekView: UICollectionViewDelegate, UICollectionViewDataSource {
     }
 
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let Type = self.MainCellType else { fatalError("Must Register a Week View Cell first") }
+        let Type = self.MainCellType ?? MTBaseCell.self
 
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Type.reuseId, for: indexPath)
 

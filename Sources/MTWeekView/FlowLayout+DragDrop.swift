@@ -83,7 +83,7 @@ extension MTWeekView: UICollectionViewDropDelegate {
         if let cell = context.intersects(at: location) {
 //            cell.overlayed = true
         }
-        return UICollectionViewDropProposal(operation: .move)
+        return proposal
     }
 
 

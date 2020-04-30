@@ -27,6 +27,7 @@ public struct LayoutConfiguration {
     public var start: Time = Time(hour: 8, minute: 0)
     public var end: Time = Time(hour: 20, minute: 0)
     public var hidesVerticalLines: Bool = false
+    public var collisionStrategy: MTCollisionStrategy = .offset(4)
 
     var range: (start: Time, end: Time) {
         return (start: start, end: end)
@@ -35,5 +36,19 @@ public struct LayoutConfiguration {
     var interval: Time = Time(hour: 1, minute: 0)
     var totalDays: Int = 5
     public var gridLineThickness: CGFloat =  1
+}
+
+public enum MTCollisionStrategy {
+    case offset(CGFloat)
+    case combine
+    case mixed(CGFloat)
+
+    var strategy: CollisionStrategy {
+        switch self {
+        case .combine: return CombineStretegy()
+        case .offset(let offset): return OffsetStrategy(offset: offset)
+        default: return CombineStretegy()
+        }
+    }
 }
 
