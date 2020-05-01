@@ -73,12 +73,13 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
         registerClasses()
         setupCollectionView()
 //        collectionView.translatesAutoresizingMaskIntoConstraints = false
-        self.fill(with: collectionView, insets: UIEdgeInsets(top: 0, left: 0, bottom: 12, right: 0))
+        self.fill(with: collectionView)
 //        collectionView.fill(with: self)
         collectionView.dragDelegate = self
         collectionView.dropDelegate = self
         collectionView.dragInteractionEnabled = true
-        collectionView.isScrollEnabled = false
+        collectionView.isUserInteractionEnabled = true
+        collectionView.isScrollEnabled = true
     }
     
     open override func layoutSubviews() {

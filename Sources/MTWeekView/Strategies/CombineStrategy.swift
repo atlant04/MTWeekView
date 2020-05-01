@@ -5,7 +5,7 @@
 //  Created by MacBook on 4/30/20.
 //
 
-import Foundation
+import UIKit
 
 struct CombineStretegy: CollisionStrategy, BaseCollisionStrategy {
     var nodes: [CombineNode] = []

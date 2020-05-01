@@ -20,6 +20,7 @@ class MTTimelineHeader: UICollectionReusableView, ReusableView {
         label.textAlignment = .center
         label.font = UIFontMetrics.default.scaledFont(for: UIFont.preferredFont(forTextStyle: .title3), maximumPointSize: 12)
         label.textColor = .secondaryLabel
+        label.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         return label
     }()
     
@@ -33,7 +34,7 @@ class MTTimelineHeader: UICollectionReusableView, ReusableView {
         NSLayoutConstraint.activate([
             label.centerYAnchor.constraint(equalTo: self.centerYAnchor),
             label.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            label.widthAnchor.constraint(equalToConstant: self.bounds.width)
+            //label.widthAnchor.constraint(equalToConstant: self.bounds.width)
         ])
     }
     

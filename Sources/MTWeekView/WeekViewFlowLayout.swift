@@ -18,7 +18,6 @@ internal protocol MTWeekViewCollectionLayoutDelegate {
 internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
     
     var delegate: MTWeekViewCollectionLayoutDelegate?
-    var coordinator: DragDropCoordinator!
     
     var headerHeight: CGFloat = 30
     var timelineWidth: CGFloat = 40
@@ -34,6 +33,9 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
     
     var unitHeight: CGFloat = 0
     var unitWidth: CGFloat = 0
+    
+    var gridUnitHeight: CGFloat = 0
+    var gridUnitWidth: CGFloat = 0
     
     typealias AttDict = [IndexPath: UICollectionViewLayoutAttributes]
     typealias Attributes = UICollectionViewLayoutAttributes
@@ -103,15 +105,17 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
     func calculateParams() {
         guard let collectionView = collectionView else { return }
         
-        horizontalLineCount = range.end.hour - range.start.hour + 1
+        horizontalLineCount = (range.start.hour ... range.end.hour).count
         verticalLineCount = config.totalDays
 
         gridHeight = collectionView.bounds.height - CGFloat(headerHeight) - CGFloat(horizontalLineCount) * config.gridLineThickness
         gridWidth = collectionView.bounds.width - CGFloat(timelineWidth)
         
-        
-        unitHeight = gridHeight / CGFloat(horizontalLineCount)
+        unitHeight = collectionView.bounds.height / CGFloat(horizontalLineCount)
         unitWidth = gridWidth / CGFloat(config.totalDays)
+        
+        gridUnitHeight = gridHeight / CGFloat(horizontalLineCount)
+        gridUnitWidth = gridWidth / CGFloat(config.totalDays)
 
         grid = Grid(frame: CGRect(x: timelineWidth, y: headerHeight * 3 / 2 , width: gridWidth, height: gridHeight))
 
@@ -159,7 +163,7 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
     }
 
     func time(at rect: CGRect) -> Time {
-        let minY = headerHeight / 2 //+ unitHeight / 2
+        let minY = unitHeight / 2
         let maxY = minY + gridHeight
         let minTime = CGFloat(config.range.start.hour)
         let maxTime = CGFloat(config.range.end.hour)
@@ -170,9 +174,12 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
         } else if time > maxTime {
             return config.end
         } else {
-            let decimal = time.truncatingRemainder(dividingBy: 1.0)
+            var decimal = time.truncatingRemainder(dividingBy: 1.0)
             let hour = Int(time)
-            let minute = decimal < 0.05 || decimal > 0.95 ? 0 : Int(decimal * 60)
+            if decimal < 0.05 || decimal > 0.95 {
+                decimal = decimal.rounded(.toNearestOrAwayFromZero)
+            }
+            let minute = Int(decimal * 60)
             return Time(hour: hour, minute: minute)
         }
 
@@ -254,11 +261,11 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
         else { return nil }
 
         let startHourY = startAttributes.frame.centerY
-        let startMinY = CGFloat(event.start.minute) * unitHeight / 60
+        let startMinY = CGFloat(event.start.minute) * gridUnitHeight / 60
         let startY = startHourY + startMinY
 
         let endHourY = endAttributes.frame.centerY
-        let endMinY = CGFloat(event.end.minute) * unitHeight / 60
+        let endMinY = CGFloat(event.end.minute) * gridUnitHeight / 60
         let height = endHourY + endMinY - startY
 
         let xOffset = dayAttributes.frame.origin.x
@@ -285,7 +292,7 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
     }
 
     func layoutTimeline() {
-        var yOffset: CGFloat = headerHeight / 2
+        var yOffset: CGFloat = 0
 
         for time in range.start.hour ... range.end.hour {
             let indexPath = IndexPath(item: time, section: Sections.Timeline.rawValue)
@@ -298,6 +305,8 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
             timelineCache[indexPath] = attributes
             yOffset += unitHeight
         }
+        
+        gridHeight = yOffset - unitHeight
     }
     
     private var contentWidth: CGFloat {
