@@ -7,7 +7,7 @@
 
 import UIKit
 
-public final class MTCollectionView: UICollectionView {
+open class MTCollectionView: UICollectionView {
 
     var lastTouchPos: CGPoint?
 

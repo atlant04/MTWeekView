@@ -43,13 +43,13 @@ extension CGRect {
 }
 
 extension UIView {
-    func fill(view: UIView) {
+    func fill(with view: UIView, insets: UIEdgeInsets = .zero) {
         view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            view.topAnchor.constraint(equalTo: topAnchor),
-            view.leadingAnchor.constraint(equalTo: leadingAnchor),
-            view.trailingAnchor.constraint(equalTo: trailingAnchor),
-            view.bottomAnchor.constraint(equalTo: bottomAnchor)
+            topAnchor.constraint(equalTo: view.topAnchor, constant: -insets.top),
+            leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: -insets.left),
+            trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: insets.right),
+            bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: insets.bottom)
         ])
     }
 }

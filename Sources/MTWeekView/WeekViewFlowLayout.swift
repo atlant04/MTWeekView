@@ -94,19 +94,21 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
 
     func clearCache() {
         allAttributes = []
+        headerCache = [:]
+        timelineCache = [:]
+        gridCache = [:]
         eventCache = [:]
     }
 
     func calculateParams() {
         guard let collectionView = collectionView else { return }
+        
+        horizontalLineCount = range.end.hour - range.start.hour + 1
+        verticalLineCount = config.totalDays
 
-        gridHeight = collectionView.bounds.height - CGFloat(headerHeight)
+        gridHeight = collectionView.bounds.height - CGFloat(headerHeight) - CGFloat(horizontalLineCount) * config.gridLineThickness
         gridWidth = collectionView.bounds.width - CGFloat(timelineWidth)
         
-        totalHours = range.end.hour - range.start.hour
-        
-        horizontalLineCount = range.end.hour - range.start.hour
-        verticalLineCount = config.totalDays
         
         unitHeight = gridHeight / CGFloat(horizontalLineCount)
         unitWidth = gridWidth / CGFloat(config.totalDays)
@@ -157,7 +159,7 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
     }
 
     func time(at rect: CGRect) -> Time {
-        let minY = headerHeight / 2 + unitHeight / 2
+        let minY = headerHeight / 2 //+ unitHeight / 2
         let maxY = minY + gridHeight
         let minTime = CGFloat(config.range.start.hour)
         let maxTime = CGFloat(config.range.end.hour)
@@ -297,10 +299,21 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
             yOffset += unitHeight
         }
     }
+    
+    private var contentWidth: CGFloat {
+      guard let collectionView = collectionView else {
+        return 0
+      }
+      let insets = collectionView.contentInset
+      return collectionView.bounds.width - (insets.left + insets.right)
+    }
+    
+    private var contentHeight: CGFloat {
+        collectionView?.bounds.height ?? 0
+    }
 
     override var collectionViewContentSize: CGSize {
-        guard let collectionView = collectionView else { return .zero }
-        return collectionView.bounds.insetBy(dx: 0, dy: -unitHeight).size
+        CGSize(width: contentWidth, height: contentHeight)
     }
 
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
