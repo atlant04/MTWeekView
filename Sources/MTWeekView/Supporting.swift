@@ -36,6 +36,8 @@ public struct LayoutConfiguration {
     var interval: Time = Time(hour: 1, minute: 0)
     var totalDays: Int = 5
     public var gridLineThickness: CGFloat =  1
+    public var headerHeight: CGFloat = 30
+    public var timelineWidth: CGFloat = 40
 }
 
 public enum MTCollisionStrategy {

@@ -24,13 +24,14 @@ class MTDayHeader: UICollectionReusableView, ReusableView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        addSubview(label)
-        NSLayoutConstraint.activate([
-            label.centerYAnchor.constraint(equalTo: self.centerYAnchor),
-            label.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            label.widthAnchor.constraint(equalToConstant: self.bounds.width)
-        ])
-//        backgroundColor = .purple
+        if frame.size.height != 0 {
+            addSubview(label)
+            NSLayoutConstraint.activate([
+                label.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+                label.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+                label.widthAnchor.constraint(equalToConstant: self.bounds.width)
+            ])
+        }
     }
     
     required init?(coder: NSCoder) {

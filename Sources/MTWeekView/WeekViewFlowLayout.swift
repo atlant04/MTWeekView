@@ -66,6 +66,8 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
         self.range = configuration.range
         self.lineWidth = configuration.gridLineThickness
         self.strategy = configuration.collisionStrategy.strategy
+        self.timelineWidth = configuration.timelineWidth
+        self.headerHeight = configuration.headerHeight
 
         super.init()
         self.register(MTGridLine.self, forDecorationViewOfKind: MTGridLine.reuseId)
