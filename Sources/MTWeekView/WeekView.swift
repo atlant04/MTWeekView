@@ -71,15 +71,12 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
         layout.delegate = self
         collectionView = MTCollectionView(frame: self.bounds, collectionViewLayout: layout!)
         registerClasses()
-        setupCollectionView()
-//        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(collectionView)
         self.fill(with: collectionView)
-//        collectionView.fill(with: self)
         collectionView.dragDelegate = self
         collectionView.dropDelegate = self
-        collectionView.dragInteractionEnabled = true
-        collectionView.isUserInteractionEnabled = true
-        collectionView.isScrollEnabled = true
+        collectionView.delegate = self
+        collectionView.dataSource = self
     }
     
     open override func layoutSubviews() {
@@ -97,13 +94,6 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
 
         guard let events = dataSource?.allEvents(for: self) else { return }
         eventProvider = EventsProvider(events: events)
-    }
-    
-    private func setupCollectionView() {
-        collectionView.backgroundColor = .systemBackground
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        addSubview(collectionView)
     }
     
     private func registerClasses() {

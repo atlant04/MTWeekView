@@ -25,7 +25,9 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
     var totalHours: Int = 24
     var heightPerHour: CGFloat = 50
     
-    var gridHeight: CGFloat = 0
+    var gridHeight: CGFloat {
+        return gridEndY - gridStartY
+    }
     var gridWidth: CGFloat = 0
     
     var horizontalLineCount: Int = 0
@@ -34,7 +36,12 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
     var unitHeight: CGFloat = 0
     var unitWidth: CGFloat = 0
     
-    var gridUnitHeight: CGFloat = 0
+    var gridStartY: CGFloat = 0
+    var gridEndY: CGFloat = 0
+    
+    var gridUnitHeight: CGFloat {
+        return gridHeight / CGFloat(horizontalLineCount)
+    }
     var gridUnitWidth: CGFloat = 0
     
     typealias AttDict = [IndexPath: UICollectionViewLayoutAttributes]
@@ -110,13 +117,11 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
         horizontalLineCount = (range.start.hour ... range.end.hour).count
         verticalLineCount = config.totalDays
 
-        gridHeight = collectionView.bounds.height - CGFloat(headerHeight) - CGFloat(horizontalLineCount) * config.gridLineThickness
         gridWidth = collectionView.bounds.width - CGFloat(timelineWidth)
         
-        unitHeight = collectionView.bounds.height / CGFloat(horizontalLineCount)
+        unitHeight = collectionView.bounds.height / CGFloat(horizontalLineCount + 1)
         unitWidth = gridWidth / CGFloat(config.totalDays)
         
-        gridUnitHeight = gridHeight / CGFloat(horizontalLineCount)
         gridUnitWidth = gridWidth / CGFloat(config.totalDays)
 
         grid = Grid(frame: CGRect(x: timelineWidth, y: headerHeight * 3 / 2 , width: gridWidth, height: gridHeight))
@@ -125,8 +130,8 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
 
     func layout() {
         if timelineCache.isEmpty {
-            layoutHeader()
             layoutTimeline()
+            layoutHeader()
             layoutGrid()
         }
         layoutEvents()
@@ -165,8 +170,8 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
     }
 
     func time(at rect: CGRect) -> Time {
-        let minY = unitHeight / 2
-        let maxY = minY + gridHeight
+        let minY = gridStartY
+        let maxY = gridEndY
         let minTime = CGFloat(config.range.start.hour)
         let maxTime = CGFloat(config.range.end.hour)
 
@@ -294,9 +299,9 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
     }
 
     func layoutTimeline() {
-        var yOffset: CGFloat = 0
+        var yOffset: CGFloat = headerHeight - unitHeight / 2
 
-        for time in range.start.hour ... range.end.hour {
+        for time in 0..<horizontalLineCount {
             let indexPath = IndexPath(item: time, section: Sections.Timeline.rawValue)
             let frame = CGRect(x: 0, y: yOffset, width: timelineWidth, height: unitHeight)
 
@@ -308,7 +313,9 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
             yOffset += unitHeight
         }
         
-        gridHeight = yOffset - unitHeight
+        gridStartY = timelineCache[IndexPath(item: 0, section: Sections.Timeline.rawValue)]!.center.y
+        let indexPath = IndexPath(item: horizontalLineCount - 1, section: Sections.Timeline.rawValue)
+        gridEndY = timelineCache[indexPath]!.center.y
     }
     
     private var contentWidth: CGFloat {
