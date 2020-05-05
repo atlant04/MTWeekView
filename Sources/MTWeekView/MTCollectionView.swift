@@ -28,3 +28,9 @@ open class MTCollectionView: UICollectionView {
         NotificationCenter.default.post(name: Notification.Name("touch"), object: lastTouchPos)
     }
 }
+
+//extension MTCollectionView: UIDropInteractionDelegate {
+//    public func dropInteraction(_ interaction: UIDropInteraction, sessionDidEnter session: UIDropSession) {
+//        print("enter")
+//    }
+//}

@@ -69,6 +69,10 @@ extension MTWeekView: UICollectionViewDropDelegate {
         invalidate()
 
     }
+    
+    public func collectionView(_ collectionView: UICollectionView, dropSessionDidEnter session: UIDropSession) {
+        //print("etner")
+    }
 
 
     public func collectionView(_ collectionView: UICollectionView, canHandle session: UIDropSession) -> Bool {
@@ -87,6 +91,56 @@ extension MTWeekView: UICollectionViewDropDelegate {
     }
 
 
+}
+
+extension MTWeekView: UIDropInteractionDelegate {
+    public func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
+        if session.localDragSession != nil {
+            moveItems(session)
+        } else {
+            let events = session.loadObjects(ofClass: AnyEvent.self) { items in
+                items.forEach { item in
+                    if let event = (item as? AnyEvent)?.event {
+                        self.eventProvider?.insert(event)
+                    }
+                }
+            }
+            reload()
+        }
+    }
+    
+    public func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
+        true
+    }
+    
+    public func dropInteraction(_ interaction: UIDropInteraction, sessionDidUpdate session: UIDropSession) -> UIDropProposal {
+        if let _ = session.localDragSession?.localContext as? DragDropCoordinator {
+            return UIDropProposal(operation: .move)
+        } else {
+            return UIDropProposal(operation: .copy)
+        }
+    }
+    
+    public func dropInteraction(_ interaction: UIDropInteraction, sessionDidEnter session: UIDropSession) {
+        session.canLoadObjects(ofClass: AnyEvent.self)
+    }
+    
+    func moveItems(_ session: UIDropSession) {
+        let finalLocation = session.location(in: collectionView)
+
+        guard
+            let context = session.localDragSession?.localContext as? DragDropCoordinator,
+            let section = layout.daySection(at: finalLocation),
+            let day = Day(rawValue: section)
+        else { return }
+
+        let start = layout.time(at: context.currentFrame(at: finalLocation))
+        let end = start + (context.event.end - context.event.start)
+        
+        eventProvider?.move(context.cell.event, to: day, start: start, end: end)
+        invalidate()
+    }
+    
 }
 
 

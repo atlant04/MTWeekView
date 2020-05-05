@@ -74,9 +74,12 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
         addSubview(collectionView)
         self.fill(with: collectionView)
         collectionView.dragDelegate = self
-        collectionView.dropDelegate = self
+//        collectionView.dropDelegate = self
         collectionView.delegate = self
         collectionView.dataSource = self
+        
+        let interaction = UIDropInteraction(delegate: self)
+        collectionView.addInteraction(interaction)
     }
     
     open override func layoutSubviews() {
@@ -215,7 +218,7 @@ final class AnyEvent: NSObject, NSItemProviderWriting, NSItemProviderReading {
         self.event = event
     }
 
-    static func decode<T: Event>(data: Data) throws -> T {
+   static func decode<T: Event>(data: Data) throws -> T {
         return try JSONDecoder().decode(T.self, from: data)
     }
 

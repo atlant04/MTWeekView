@@ -8,13 +8,10 @@
 
 import Foundation
 
-public protocol Event: Codable, Equal {
+public protocol Event: Codable {
     var day: Day { get set }
     var start: Time { get set }
     var end: Time { get set }
-}
-
-public protocol Equal {
     var id: UUID { get }
 }
 
