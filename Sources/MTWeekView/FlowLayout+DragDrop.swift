@@ -95,22 +95,24 @@ extension MTWeekView: UICollectionViewDropDelegate {
 
 extension MTWeekView: UIDropInteractionDelegate {
     public func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
-        if session.localDragSession != nil {
+        if session.localDragSession?.localContext is DragDropCoordinator {
             moveItems(session)
         } else {
-            let events = session.loadObjects(ofClass: AnyEvent.self) { items in
-                items.forEach { item in
-                    if let event = (item as? AnyEvent)?.event {
-                        self.eventProvider?.insert(event)
+            for item in session.items {
+                if item.itemProvider.canLoadObject(ofClass: AnyEvent.self) {
+                    item.itemProvider.loadObject(ofClass: AnyEvent.self) { (loaded, _) in
+                        if let event = (loaded as? AnyEvent)?.event {
+                            self.eventProvider?.insert(event)
+                        }
                     }
                 }
             }
-            reload()
+            invalidate()
         }
     }
     
     public func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
-        true
+        session.canLoadObjects(ofClass: AnyEvent.self)
     }
     
     public func dropInteraction(_ interaction: UIDropInteraction, sessionDidUpdate session: UIDropSession) -> UIDropProposal {
@@ -119,10 +121,6 @@ extension MTWeekView: UIDropInteractionDelegate {
         } else {
             return UIDropProposal(operation: .copy)
         }
-    }
-    
-    public func dropInteraction(_ interaction: UIDropInteraction, sessionDidEnter session: UIDropSession) {
-        session.canLoadObjects(ofClass: AnyEvent.self)
     }
     
     func moveItems(_ session: UIDropSession) {
