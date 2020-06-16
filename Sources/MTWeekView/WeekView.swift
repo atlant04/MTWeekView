@@ -86,6 +86,7 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
         super.layoutSubviews()
         layout.clearCache()
         layout.invalidateLayout()
+        print(bounds)
     }
     
     

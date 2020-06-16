@@ -21,6 +21,8 @@ open class MTBaseCell: UICollectionViewCell, MTConfigurableCell, UIDropInteracti
         }
     }
 
+    static var stripEnabled = false
+    
     open func configure(with event: Event) {
         self.event = event
     }
@@ -29,10 +31,11 @@ open class MTBaseCell: UICollectionViewCell, MTConfigurableCell, UIDropInteracti
     override public init(frame: CGRect) {
         super.init(frame: frame)
 
-        view.backgroundColor = .systemBlue
-        contentView.addSubview(view)
-        self.isUserInteractionEnabled = true
-
+        if MTBaseCell.stripEnabled {
+            view.backgroundColor = .systemBlue
+            contentView.addSubview(view)
+            self.isUserInteractionEnabled = true
+        }
 //        let interaction = UIDropInteraction(delegate: self)
 //        addInteraction(interaction)
     }

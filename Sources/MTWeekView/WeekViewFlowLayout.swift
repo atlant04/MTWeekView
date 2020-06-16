@@ -119,10 +119,11 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
 
         gridWidth = collectionView.bounds.width - CGFloat(timelineWidth)
         
-        unitHeight = collectionView.bounds.height / CGFloat(horizontalLineCount + 1)
+        unitHeight = collectionView.bounds.height / CGFloat(horizontalLineCount) - config.gridLineThickness
         unitWidth = gridWidth / CGFloat(config.totalDays)
         
         gridUnitWidth = gridWidth / CGFloat(config.totalDays)
+        headerHeight = max(unitHeight, 15)
 
         grid = Grid(frame: CGRect(x: timelineWidth, y: headerHeight * 3 / 2 , width: gridWidth, height: gridHeight))
 
@@ -299,23 +300,25 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
     }
 
     func layoutTimeline() {
-        var yOffset: CGFloat = headerHeight - unitHeight / 2
+        var yOffset: CGFloat = max(headerHeight - unitHeight / 2, 0)
 
         for time in 0..<horizontalLineCount {
-            let indexPath = IndexPath(item: time, section: Sections.Timeline.rawValue)
-            let frame = CGRect(x: 0, y: yOffset, width: timelineWidth, height: unitHeight)
+            let indexPath = IndexPath(item: time + range.start.hour, section: Sections.Timeline.rawValue)
+            let frame = CGRect(x: 0, y: yOffset, width: timelineWidth, height: unitHeight - config.gridLineThickness)
 
             let attributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: MTTimelineHeader.reuseId, with: indexPath)
 
             attributes.frame = frame
             attributes.zIndex = 1
             timelineCache[indexPath] = attributes
-            yOffset += unitHeight
+            yOffset += unitHeight - config.gridLineThickness
         }
         
-        gridStartY = timelineCache[IndexPath(item: 0, section: Sections.Timeline.rawValue)]!.center.y
-        let indexPath = IndexPath(item: horizontalLineCount - 1, section: Sections.Timeline.rawValue)
-        gridEndY = timelineCache[indexPath]!.center.y
+        let startPath = IndexPath(item: range.start.hour, section: Sections.Timeline.rawValue)
+        gridStartY = timelineCache[startPath]!.center.y
+        var endPath = startPath
+        endPath.item += horizontalLineCount - 1
+        gridEndY = timelineCache[endPath]!.center.y
     }
     
     private var contentWidth: CGFloat {
