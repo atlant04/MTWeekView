@@ -9,16 +9,19 @@
 import UIKit
 import MobileCoreServices
 
-public protocol MTWeekViewDataSource {
+public protocol MTWeekViewDataSource: class {
     func weekView(_ weekView: MTWeekView, eventsForDay day: Day) -> [Event]
     func allEvents(for weekView: MTWeekView) -> [Event]
 }
 
+@IBDesignable
 open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
 
     //MARK: Public
-    public var configuration: LayoutConfiguration!
-    public var dataSource: MTWeekViewDataSource? {
+    public var configuration: LayoutConfiguration! {
+        didSet { reload() }
+    }
+    public weak var dataSource: MTWeekViewDataSource? {
         didSet { reload() }
     }
     public var collectionView: MTCollectionView!
@@ -55,7 +58,9 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
     }
 
     public required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(coder: coder)
+        self.configuration = LayoutConfiguration()
+        commonInit()
     }
 
     //MARK: Private
