@@ -124,7 +124,8 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
         
         gridUnitWidth = gridWidth / CGFloat(config.totalDays)
         headerHeight = max(unitHeight, 15)
-
+        
+        contentHeight = headerHeight + unitHeight * CGFloat((horizontalLineCount - 1))
         grid = Grid(frame: CGRect(x: timelineWidth, y: headerHeight * 3 / 2 , width: gridWidth, height: gridHeight))
 
     }
@@ -329,9 +330,7 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
       return collectionView.bounds.width - (insets.left + insets.right)
     }
     
-    private var contentHeight: CGFloat {
-        collectionView?.bounds.height ?? 0
-    }
+    private var contentHeight: CGFloat = 0
 
     override var collectionViewContentSize: CGSize {
         CGSize(width: contentWidth, height: contentHeight)
