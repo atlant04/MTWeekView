@@ -24,7 +24,7 @@ open class MTWeekView: UIView, MTWeekViewCollectionLayoutDelegate {
     public weak var dataSource: MTWeekViewDataSource? {
         didSet { reload() }
     }
-    public var collectionView: MTCollectionView!
+    public private(set) var collectionView: MTCollectionView!
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -194,7 +194,7 @@ extension MTWeekView: UICollectionViewDragDelegate {
 
 struct ConcreteEvent: Event, Codable {
 
-    var id: UUID = UUID()
+    var id: String = UUID().uuidString
 
     var day: Day
     var start: Time
@@ -205,11 +205,19 @@ struct ConcreteEvent: Event, Codable {
         self.start = start
         self.end = end
     }
+    
+    init(day: Day, start: Time, end: Time, id: String) {
+        self.day = day
+        self.start = start
+        self.id = id
+        self.end = end
+    }
 
     init(event: Event) {
         self.day = event.day
         self.start = event.start
         self.end = event.end
+        self.id = event.id
     }
 }
 

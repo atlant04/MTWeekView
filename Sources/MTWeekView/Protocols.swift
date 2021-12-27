@@ -9,10 +9,10 @@
 import Foundation
 
 public protocol Event: Codable {
-    var day: Day { get set }
-    var start: Time { get set }
-    var end: Time { get set }
-    var id: UUID { get }
+    var day: Day { get }
+    var start: Time { get }
+    var end: Time { get }
+    var id: String { get }
 }
 
 public extension Event {

@@ -113,10 +113,7 @@ extension ProviderImplementation {
     func move(_ event: Event, to day: Day, start: Time, end: Time) {
         delete(event)
 
-        var newEvent = event
-        newEvent.day = day
-        newEvent.start = start
-        newEvent.end = end
+        let newEvent = ConcreteEvent(day: day, start: start, end: end, id: event.id)
 
         insert(newEvent)
     }

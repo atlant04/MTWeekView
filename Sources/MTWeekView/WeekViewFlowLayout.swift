@@ -138,11 +138,7 @@ internal class MTWeekViewCollectionLayout: UICollectionViewLayout {
         }
         layoutEvents()
     }
-
-    func updateEvent(_ event: inout Event, for rect: CGRect) {
-        event.day = .Monday
-    }
-
+    
     func populateBounds() {
         for (indexPath, attributes) in headerCache {
             let range: ClosedRange<CGFloat> = attributes.frame.minX ... attributes.frame.maxX
